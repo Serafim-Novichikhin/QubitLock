@@ -1,0 +1,15 @@
+.gradle
+.git
+.gitignore
+*.log
+*.iml
+*.ipr
+*.iws
+.project
+.classpath
+.settings
+build
+out
+dist
+*.jar
+.DS_Store

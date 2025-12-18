@@ -1,0 +1,25 @@
+services:
+  mongodb:
+    image: mongo:8
+    container_name: qubitlock-mongodb
+    ports:
+      - "27017:27017"
+    restart: unless-stopped
+    volumes:
+      - ./init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+
+  vault:
+    image: hashicorp/vault:1.20.0
+    container_name: qubitlock-vault
+    ports:
+      - "8200:8200"
+    environment:
+      VAULT_DEV_ROOT_TOKEN_ID: root-token
+      VAULT_DEV_LISTEN_ADDRESS: "0.0.0.0:8200"
+    cap_add:
+      - IPC_LOCK
+    volumes:
+      - ./init-vault.sh:/init-vault.sh:ro
+    entrypoint: ["sh", "/init-vault.sh"]  # Используем entrypoint вместо command
+    restart: unless-stopped
+volumes: {}
