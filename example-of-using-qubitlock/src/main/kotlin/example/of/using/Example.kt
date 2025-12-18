@@ -55,36 +55,34 @@ fun main() = runBlocking {
     )
 
     // Простейший пример
-    val secretMessage = "Hello QubitLock! My secret: ${System.currentTimeMillis()}"
-
-
-    println("\n2. 🔐 Зашифровываю через QubitLock...")
+    val myFile = File("C:\\Users\\16227\\Documents\\QubitLock\\test.txt")
+    println("\n1. Зашифровываю и сохраняю через QubitLock... (команда client.encryptAndStore(...))")
     val metadata = client.encryptAndStore(
-        fileData = File("C:\\Users\\16227\\Documents\\QubitLock\\test.txt").readBytes(),
-        fileName = "secret.txt",
+        fileData = myFile.readBytes(),
+        fileName = myFile.name,
         options = EncryptOptions()
     )
 
     println("   ✅ Сохранено! ID: ${metadata.id}")
 
-    println("\n3. 🔍 Проверяю целостность...")
+    println("\n2. Проверяю целостность... (команда client.verifyIntegrity(fileId) (это необязательный шаг, потому что при получении всё проверится автоматически))")
     val verified = client.verifyIntegrity(metadata.id)
     println("   ✅ Целостность: $verified")
 
-    println("\n4. 📥 Получаю обратно...")
+    println("\n3.  Получаю обратно... (команда client.retrieveAndDecrypt(fileId))")
     val retrieved = String(client.retrieveAndDecrypt(metadata.id))
     println("   ✅ Получено: \"$retrieved\"")
 
     println("\n" + """
-        🎯 ВСЁ РАБОТАЕТ!
+        ВСЁ РАБОТАЕТ!
         
         Что сделал QubitLock за меня:
         • Шифрование через Vault ✓
-        • Сохранение в MongoDB ✓
+        • Сохранение в моей базе данных (можно было выбрать облако QubitLock) ✓ 
         • Проверка целостности ✓
         • Автовосстановление ✓
         
-        Мой код: всего 10 строк!
-        Простота использования: 10/10 ✅
+        Мой код: всего несколько строк!
+        Очень удобно
     """.trimIndent())
 }
