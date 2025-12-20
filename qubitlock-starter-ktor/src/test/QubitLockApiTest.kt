@@ -101,12 +101,10 @@ class QubitLockApiTest {
                 )
             )
 
-            // Create real components
             val mongoClient = MongoClients.create("mongodb://$connectionString")
             val database = mongoClient.getDatabase("test")
             val fileRepository = MongoFileRepository(database)
 
-            // Mock VaultService since we don't have Vault running
             val mockVaultService = io.mockk.mockk<VaultService> {
                 coEvery { encryptData(any()) } returns "vault:v1:mock_encrypted"
                 coEvery { decryptData(any()) } returns "Decrypted content".toByteArray()
@@ -115,11 +113,9 @@ class QubitLockApiTest {
 
             val qubitLockClient = QubitLockClient(properties, mockVaultService, fileRepository)
 
-            // Store client in attributes
             attributes.put(io.ktor.util.AttributeKey<QubitLockClient>("QubitLockClient"), qubitLockClient)
         }
 
-        // Test file upload
         val uploadResponse = client.post("/files") {
             setBody(
                 """
@@ -140,7 +136,6 @@ class QubitLockApiTest {
         val fileId = uploadJson.jsonObject["id"]?.jsonPrimitive?.content
         assertNotNull(fileId)
 
-        // Test verification
         val verifyResponse = client.get("/files/$fileId/verify")
         assertEquals(HttpStatusCode.OK, verifyResponse.status)
 
@@ -194,13 +189,10 @@ class QubitLockApiTest {
             QubitLockAutoConfiguration.configure(this)
         }
 
-        // Test with empty body
         val response = client.post("/files") {
             setBody("")
             header(HttpHeaders.ContentType, ContentType.MultiPart.FormData.toString())
         }
-
-        // Should return 400 or 500 depending on implementation
         assertTrue(response.status == HttpStatusCode.BadRequest ||
                 response.status == HttpStatusCode.InternalServerError)
     }
