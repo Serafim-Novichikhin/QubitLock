@@ -21,6 +21,12 @@ dependencies {
 
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.0")
 
+    // Тестирование
+    testImplementation(kotlin("test"))
+    testImplementation("io.mockk:mockk:1.13.9")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.0")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.10.0")
+
     // Логи
     implementation("ch.qos.logback:logback-classic:1.4.11")
 
@@ -56,7 +62,7 @@ publishing {
                         name.set("Serafim")
                         email.set("ne_hochy.ykazivat@example.com")
                     }
-                    // Подставьте сюда свои данные:
+                    // Подставьте сюда свои данные или я могу подставить:
                     developer {
                         id.set("yourusername")
                         name.set("Your Name")
@@ -71,4 +77,8 @@ publishing {
             }
         }
     }
+}
+
+tasks.test {
+    useJUnitPlatform()
 }

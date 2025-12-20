@@ -19,10 +19,16 @@ dependencies {
     implementation("io.github.jopenlibs:vault-java-driver:5.2.0")
     // Сжатие
     implementation("org.apache.commons:commons-compress:1.24.0")
+    implementation("com.github.luben:zstd-jni:1.5.5-4")
     // Хеширование
     implementation("org.bouncycastle:bcprov-jdk18on:1.76")
 
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.0")
+
+    // Тестирование
+    testImplementation(kotlin("test"))
+    testImplementation("io.mockk:mockk:1.13.9")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.0")
 
     // Логи
     implementation("org.slf4j:slf4j-api:2.0.9")
@@ -79,4 +85,8 @@ publishing {
             }
         }
     }
+}
+
+tasks.test {
+    useJUnitPlatform()
 }

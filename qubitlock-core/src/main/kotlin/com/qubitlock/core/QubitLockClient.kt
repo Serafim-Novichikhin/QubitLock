@@ -34,17 +34,21 @@ class QubitLockClient(
         var processedData = fileData
         if (properties.features.compression && options.enableCompression) {
             compressionAlgorithm = detectCompressionAlgorithm(fileName)
-            val compressed = compressData(fileData, compressionAlgorithm)
-            if (compressed.size > fileData.size) {
-                println("Файл маленький, поэтому сжатие не требуется.")
-                compressionAlgorithm = null
-            }
-            else if (compressed.isNotEmpty()) {
-                println("Сжато: ${fileData.size} → ${compressed.size} байт. Эффективность: ${(fileData.size - compressed.size) * 100 / fileData.size}%")
-                processedData = compressed
+            if (compressionAlgorithm != null) {
+                val compressed = compressData(fileData, compressionAlgorithm)
+                if (compressed.size > fileData.size) {
+                    println("Файл маленький, поэтому сжатие не требуется.")
+                    compressionAlgorithm = null
+                } else if (compressed.isNotEmpty()) {
+                    val eff = (fileData.size - compressed.size) * 1000 / fileData.size
+                    println("Сжато: ${fileData.size} → ${compressed.size} байт. Эффективность: ${eff / 10}.${eff % 10}%")
+                    processedData = compressed
+                } else {
+                    println("⚠️ Странно: размер сжатого файла равен нулю. Поэтому сохраняем исходный.")
+                }
             }
             else {
-                println("⚠️ Странно: размер сжатого файла равен нулю. Поэтому сохраняем исходный.")
+                println("Для такого типа файла сжатие не требуется")
             }
         }
 
@@ -156,11 +160,18 @@ class QubitLockClient(
         }
     }
 
-    private fun detectCompressionAlgorithm(fileName: String): String {
+    private fun detectCompressionAlgorithm(fileName: String): String? {
         val extension = fileName.substringAfterLast('.', "").lowercase()
         return when (extension) {
-            in listOf("txt", "csv", "json", "xml", "log", "pdf") -> CompressorStreamFactory.GZIP
-            in listOf("jpg", "jpeg", "png", "bmp", "gif") -> CompressorStreamFactory.BZIP2
+            in listOf(
+                "zip", "gz", "gzip", "bz2", "bzip2", "xz", "lz", "lzma", "zstd",
+                "7z", "rar", "tar", "tgz", "tbz2", "txz", "tlz", "tzst",
+                "jpg", "jpeg", "png", "gif", "webp", "mp3", "mp4", "avi", "mkv",
+                "pdf", "docx", "xlsx", "pptx"
+            ) -> null // Эти форматы уже используют сжатие
+            in listOf("txt", "csv", "json", "xml", "log", "html", "js", "css") -> CompressorStreamFactory.ZSTANDARD
+            "pdf" -> CompressorStreamFactory.GZIP
+            in "bmp" -> CompressorStreamFactory.BZIP2
             else -> CompressorStreamFactory.DEFLATE
         }
     }
@@ -168,12 +179,18 @@ class QubitLockClient(
     private fun detectContentType(fileName: String): String {
         val extension = fileName.substringAfterLast('.', "").lowercase()
         return when (extension) {
-            "txt" -> "text/plain"
+            "txt", "log" -> "text/plain"
             "json" -> "application/json"
             "xml" -> "application/xml"
+            "html", "htm" -> "text/html"
+            "css" -> "text/css"
+            "js" -> "application/javascript"
             "jpg", "jpeg" -> "image/jpeg"
             "png" -> "image/png"
+            "gif" -> "image/gif"
             "pdf" -> "application/pdf"
+            "zip" -> "application/zip"
+            "gz" -> "application/gzip"
             else -> "application/octet-stream"
         }
     }
